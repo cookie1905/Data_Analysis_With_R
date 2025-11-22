@@ -131,4 +131,50 @@ exp(cbind(odds.ratio = glm.model$coefficients, confint(glm.model)))
 # if we have count data then Poisson 
 
 
+# Long vs Wide Format
+# ==========================================
+# Wide format: each variable has its own column.
+# most commonly used
 
+# Long format: one column for the variable name, another for its values.
+
+data("airquality")
+head(airquality)      # Wide format, each variable has its own column.
+
+library(ggplot2)
+#  ggplot works best with long (tidy) format data.
+
+# For a basic scatter plot, wide format will do
+ggplot(airquality, aes(x = Temp, y = Ozone)) +
+  geom_point() +
+  labs(x = "Temperature", y = "Ozone") +
+  theme_minimal()
+
+# But to plot more than 2 variables, ggplot need long format
+
+library(tidyr)
+
+airquality.long <- airquality %>%          # pipe operator
+  pivot_longer(
+    cols = c(Ozone, Solar.R, Wind, Temp),  # columns to reshape
+    names_to = "Variable",                 # new column name
+    values_to = "Value"                    # new column for values
+  )
+head(airquality.long)
+
+library(ggplot2)
+
+ggplot(airquality.long, aes(x = Day, y = Value, color = Variable)) +
+  geom_line() +
+  facet_wrap(~ Month) +
+  labs(x = "Day", y = "Value", title = "Airquality variables by day (May-Sep)") +
+  theme_minimal()
+
+# Back to wide format
+
+airquality.wide <- airquality.long %>% pivot_wider(
+  names_from = Variable,
+  values_from = Value
+)
+head(airquality.wide)
+head(airquality)
